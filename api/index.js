@@ -1,3 +1,4 @@
+//todo  NEED TO MAKE IT AS MVC STRUCTURE LATER
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
