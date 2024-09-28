@@ -26,7 +26,7 @@ const connectionDB = async () => {
     process.exit(1);
   }
 };
-
+//! auth end points
 // Create account route
 app.post("/create-account", async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -89,6 +89,33 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ status: "fail", message: `Error: ${err.message}` });
   }
 });
+app.get("/get-user", authenticateToken, async (req, res) => {
+  try {
+    const { id: userId } = req.user; // Destructure for clarity
+    const user = await User.findById(userId); // Use findById for clarity
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      status: "success",
+      user: {
+        fullName: user.fullName,
+        email: user.email,
+        _id: user._id,
+        createOn: user.createOn, // Fixed typo
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "An error occurred while retrieving user information.",
+      error: err.message, // Optional: Include error message for debugging
+    });
+  }
+});
+
+//! notes end points
 app.post("/add-note", authenticateToken, async (req, res) => {
   const { title, content, tags } = req.body;
   const userId = req.user.id; // Access user ID directly from req.user
