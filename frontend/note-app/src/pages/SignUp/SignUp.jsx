@@ -57,7 +57,7 @@ function SignUp() {
             </button>
             <p className="text-sm text-center mt-4">
               Already have an account ?
-              <Link to="/log-in" className="font-medium text-primary underline">
+              <Link to="/login" className="font-medium text-primary underline">
                 LogIn
               </Link>
             </p>

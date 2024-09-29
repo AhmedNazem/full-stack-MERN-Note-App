@@ -1,12 +1,14 @@
 import { useState } from "react";
 import PasswordInput from "../../components/Input/PasswordInput.jsx";
 import NavBar from "../../components/NavBar/NavBar.jsx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { validateEmail } from "../../utils/helper.js";
+import { axiosInstance } from "../../utils/axiosInstance.js";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateEmail(email)) {
@@ -17,6 +19,22 @@ function Login() {
       return;
     }
     setError("");
+    try {
+      const res = await axiosInstance.post("/login", {
+        email: email,
+        password: password,
+      });
+      if (res.data && res.data.accessToken) {
+        localStorage.setItem("token", res.data.accessToken);
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("An unexpected error happened . please try again ");
+      }
+    }
   };
   return (
     <>
@@ -42,10 +60,7 @@ function Login() {
             </button>
             <p className="text-sm text-center mt-4">
               Not registered yet ?
-              <Link
-                to="/sign-up"
-                className="font-medium text-primary underline"
-              >
+              <Link to="/signup" className="font-medium text-primary underline">
                 Create account
               </Link>
             </p>
