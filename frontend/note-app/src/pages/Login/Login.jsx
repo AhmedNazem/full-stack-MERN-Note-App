@@ -11,31 +11,44 @@ function Login() {
   const navigate = useNavigate();
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // Validate email
     if (!validateEmail(email)) {
-      return setError("please enter a valid email address.");
+      return setError("Please enter a valid email address.");
     }
+
+    // Validate password
     if (!password) {
-      setError("please enter your password ");
-      return;
+      return setError("Please enter your password.");
     }
-    setError("");
+
+    setError(""); // Clear any previous errors
+
     try {
-      const res = await axiosInstance.post("/login", {
-        email: email,
-        password: password,
+      const response = await axiosInstance.post("/login", {
+        email,
+        password,
       });
-      if (res.data && res.data.accessToken) {
-        localStorage.setItem("token", res.data.accessToken);
+
+      // Check for accessToken in response
+      if (response.data && response.data.accessToken) {
+        localStorage.setItem("accessToken", response.data.accessToken); // Ensure the key matches your app
         navigate("/dashboard");
       }
-    } catch (err) {
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
+    } catch (error) {
+      // Handle errors from the response
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message);
       } else {
-        setError("An unexpected error happened . please try again ");
+        setError("An unexpected error occurred. Please try again.");
       }
     }
   };
+
   return (
     <>
       <NavBar />

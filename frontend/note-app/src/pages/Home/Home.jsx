@@ -2,8 +2,10 @@ import NoteCard from "../../components/Cards/NoteCard.jsx";
 import NavBar from "../../components/NavBar/NavBar.jsx";
 import { MdAdd } from "react-icons/md";
 import AddEditNotes from "./AddEditNotes.jsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "react-modal";
+import { useNavigate } from "react-router-dom";
+import { axiosInstance } from "../../utils/axiosInstance.js";
 
 function Home() {
   const [openAddEditModal, setOpenAddEditModal] = useState({
@@ -11,6 +13,31 @@ function Home() {
     type: "add",
     data: null,
   });
+  const [userInfo, setUserInfo] = useState(null);
+  const navigate = useNavigate();
+  const getUserInfo = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await axiosInstance.get("/get-user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.data && res.data.user) {
+        setUserInfo(res.data.user);
+      }
+    } catch (error) {
+      console.error("An error occurred:", error.message);
+      if (error.response && error.response.status === 401) {
+        localStorage.clear();
+        navigate("/login");
+      }
+    }
+  };
+
+  useEffect(() => {
+    getUserInfo();
+  }, []);
 
   return (
     <>

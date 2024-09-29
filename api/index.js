@@ -90,13 +90,17 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ status: "fail", message: `Error: ${err.message}` });
   }
 });
+
 app.get("/get-user", authenticateToken, async (req, res) => {
   try {
-    const { id: userId } = req.user; // Destructure for clarity
+    const userId = req.user._id; // Make sure to use _id if that's how it's stored in the JWT
+    console.log("Looking for user with ID:", userId); // Log the user ID being searched
+
     const user = await User.findById(userId); // Use findById for clarity
+    console.log("The user is:", user); // Log user details
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(401).json({ message: "Your session has expired." });
     }
 
     res.status(200).json({
@@ -105,13 +109,14 @@ app.get("/get-user", authenticateToken, async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         _id: user._id,
-        createOn: user.createOn, // Fixed typo
+        createOn: user.createOn, // Fixed typo from createOn to createdOn
       },
     });
   } catch (err) {
+    console.error("Error retrieving user:", err.message); // Log error for debugging
     return res.status(500).json({
       message: "An error occurred while retrieving user information.",
-      error: err.message, // Optional: Include error message for debugging
+      error: err.message, // Include error message for debugging (optional)
     });
   }
 });
