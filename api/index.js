@@ -33,31 +33,56 @@ app.post("/create-account", async (req, res) => {
   const { fullName, email, password } = req.body;
 
   try {
-    const hashedPassword = await hashPassword(password);
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Email is already in use. Please choose another one.",
+      });
+    }
+
+    // Hash the password before storing
+    const hashedPassword = await hashPassword(password); // Ensure bcrypt is used
+
+    // Create the new user
     const newAccount = await User.create({
       fullName,
       email,
       password: hashedPassword,
     });
 
+    // Create JWT token
     const accessToken = jwt.sign(
       { id: newAccount._id },
       process.env.JWT_SECRET,
       {
-        expiresIn: "3600m",
+        expiresIn: "5000m", // Token valid for 1 hour
       }
     );
 
+    // Return success response
     res.status(201).json({
       status: "success",
-      data: { newAccount },
+      data: {
+        user: {
+          fullName: newAccount.fullName,
+          email: newAccount.email,
+          _id: newAccount._id,
+        },
+      },
       accessToken,
       message: "Account created successfully",
     });
   } catch (err) {
-    res.status(500).json({ status: "fail", message: `Error: ${err.message}` });
+    // Handle any error that occurs
+    res.status(500).json({
+      status: "fail",
+      message: `Error: ${err.message}`,
+    });
   }
 });
+
 // Login route
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -93,14 +118,14 @@ app.post("/login", async (req, res) => {
 
 app.get("/get-user", authenticateToken, async (req, res) => {
   try {
-    const userId = req.user._id; // Make sure to use _id if that's how it's stored in the JWT
+    const userId = req.user.id; // Make sure to use id if that's how it's stored in the JWT
     console.log("Looking for user with ID:", userId); // Log the user ID being searched
 
     const user = await User.findById(userId); // Use findById for clarity
     console.log("The user is:", user); // Log user details
 
     if (!user) {
-      return res.status(401).json({ message: "Your session has expired." });
+      return res.status(404).json({ message: "User not found." });
     }
 
     res.status(200).json({
@@ -109,7 +134,7 @@ app.get("/get-user", authenticateToken, async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         _id: user._id,
-        createOn: user.createOn, // Fixed typo from createOn to createdOn
+        createOn: user.createOn, // Ensure the field name is correct
       },
     });
   } catch (err) {

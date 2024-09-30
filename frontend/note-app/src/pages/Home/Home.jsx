@@ -15,14 +15,20 @@ function Home() {
   });
   const [userInfo, setUserInfo] = useState(null);
   const navigate = useNavigate();
+
   const getUserInfo = async () => {
     try {
       const token = localStorage.getItem("accessToken");
+      if (!token) {
+        throw new Error("No token provided");
+      }
+
       const res = await axiosInstance.get("/get-user", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
       if (res.data && res.data.user) {
         setUserInfo(res.data.user);
       }
@@ -31,6 +37,9 @@ function Home() {
       if (error.response && error.response.status === 401) {
         localStorage.clear();
         navigate("/login");
+      } else {
+        // Handle other errors if necessary
+        alert("An unexpected error occurred. Please try again.");
       }
     }
   };
@@ -41,7 +50,7 @@ function Home() {
 
   return (
     <>
-      <NavBar />
+      <NavBar userInfo={userInfo} />
       <div className="container mx-auto mt-8">
         <div className="grid grid-cols-3 gap-6">
           <NoteCard

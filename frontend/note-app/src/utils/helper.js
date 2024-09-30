@@ -7,12 +7,14 @@ export const validateEmail = (email) => {
 };
 
 export const getInitials = (name) => {
-  const trimWord = name.trim();
-  if (!trimWord) return "";
-  const words = trimWord.split(" ");
-  let initials = "";
-  for (let i = 0; i < Math.min(words.length, 2); i++) {
-    initials += words[i][0];
-  }
-  return initials.toUpperCase();
+  if (!name) return ""; // Return early if no name is provided
+
+  const words = name.trim().split(" "); // Trim and split in one line
+  let initials = words
+    .filter((word) => word.length > 0) // Filter out any empty words due to extra spaces
+    .slice(0, 2) // Get the first two words
+    .map((word) => word[0].toUpperCase()) // Get the first letter and convert to uppercase
+    .join(""); // Join the initials
+
+  return initials; // Return the resulting initials
 };

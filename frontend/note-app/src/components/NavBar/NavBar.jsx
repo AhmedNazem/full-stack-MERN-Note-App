@@ -1,14 +1,17 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 import { useNavigate } from "react-router-dom";
 import ProfileInfo from "../Cards/ProfileInfo.jsx";
 import SearchBar from "../SearchBar/SearchBar.jsx";
 import { useState } from "react";
 
-function NavBar() {
+function NavBar({ userInfo }) {
   const [searchQuery, setSearchQuery] = useState(""); // Fix typo
   const navigate = useNavigate(); // Call useNavigate() correctly
 
   const onLogOut = () => {
-    navigate("/log-in"); // Use navigate to redirect
+    localStorage.clear();
+    navigate("/login"); // Use navigate to redirect
   };
 
   const handleSearch = () => {
@@ -29,7 +32,7 @@ function NavBar() {
         handleSearch={handleSearch} // Fix typo: handleSearch instead of handelSearch
         onClearSearch={onClearSearch}
       />
-      <ProfileInfo onLogOut={onLogOut} />
+      <ProfileInfo userInfo={userInfo} onLogOut={onLogOut} />
     </div>
   );
 }

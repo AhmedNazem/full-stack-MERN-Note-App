@@ -2,17 +2,19 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
+  console.log("Authorization Header:", authHeader); // Log the auth header
+
   const token = authHeader?.split(" ")[1]; // Use optional chaining for safety
 
   if (!token) {
     console.log("No token provided"); // Log for missing token
-    return res.sendStatus(401);
+    return res.status(401).json({ message: "No token provided" });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
       console.log("Token verification error:", err.message); // Log verification error
-      return res.sendStatus(401);
+      return res.status(401).json({ message: "Unauthorized. Invalid token." });
     }
 
     req.user = user; // Assign the user object to the request
